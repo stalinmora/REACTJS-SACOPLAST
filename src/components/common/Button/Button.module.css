@@ -1,0 +1,25 @@
+.button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.primary {
+  background-color: var(--primary-green);
+  color: white;
+}
+
+.secondary {
+  background-color: #f0f0f0;
+  color: black;
+}
+
+.primary:hover {
+  background-color: #218838;
+}
+
+.secondary:hover {
+  background-color: #e0e0e0;
+}

@@ -1,0 +1,124 @@
+.container {
+  padding: 24px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 1200px;
+}
+
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.row {
+  display: flex;
+  gap: 16px;
+}
+
+.row > div {
+  flex: 1;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 16px;
+  justify-content: flex-start;
+}
+
+.reportTable {
+  margin-top: 24px;
+}
+
+.tableContainer {
+  overflow-x: auto;
+  margin-top: 16px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+.table th,
+.table td {
+  padding: 12px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.table th {
+  background-color: #f5f5f5;
+  font-weight: bold;
+}
+
+.table tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.exceptionType {
+  color: #dc3545;
+  font-weight: bold;
+  background-color: #f8d7da;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.regularType {
+  color: #28a745;
+  font-weight: bold;
+  background-color: #d4edda;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.summary {
+  margin-top: 24px;
+  padding: 16px;
+  background-color: #e9f7ef;
+  border-radius: 8px;
+  border: 1px solid #28a745;
+}
+
+.summaryStats {
+  display: flex;
+  gap: 24px;
+  margin-top: 12px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: white;
+  border-radius: 4px;
+  border: 1px solid #28a745;
+}
+
+.label {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-bottom: 4px;
+}
+
+.value {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #28a745;
+}
+
+.error {
+  color: red;
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: #f8d7da;
+  border-radius: 4px;
+}
