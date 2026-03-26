@@ -154,11 +154,10 @@ const WorkReportPage = () => {
                   <th>Empleado</th>
                   <th>Grupo</th>
                   <th>Fecha</th>
-                  <th>Turno</th>
-                  <th>Hora Inicio</th>
-                  <th>Hora Fin</th>
-                  <th>Tipo</th>
-                  <th>Razón (si aplica)</th>
+                  <th>Horas Trabajadas</th>
+                  <th>Producción Esperada</th>
+                  <th>Producción Real</th>
+                  <th>Eficiencia</th>
                 </tr>
               </thead>
               <tbody>
@@ -167,15 +166,10 @@ const WorkReportPage = () => {
                     <td>{report.employee_name}</td>
                     <td>{report.group_name}</td>
                     <td>{new Date(report.date).toLocaleDateString()}</td>
-                    <td>{report.shift_name}</td>
-                    <td>{report.start_time}</td>
-                    <td>{report.end_time}</td>
-                    <td>
-                      <span className={report.is_exception ? styles.exceptionType : styles.regularType}>
-                        {report.is_exception ? 'Excepción' : 'Regular'}
-                      </span>
-                    </td>
-                    <td>{report.reason || '-'}</td>
+                    <td>{report.hours_worked || '-'}</td>
+                    <td>{report.expected_production || '-'}</td>
+                    <td>{report.actual_production || '-'}</td>
+                    <td>{report.efficiency ? `${report.efficiency}%` : '-'}</td>
                   </tr>
                 ))}
               </tbody>
