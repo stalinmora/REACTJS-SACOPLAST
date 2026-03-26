@@ -45,14 +45,12 @@ const WorkReportPage = () => {
   };
 
   const generateReport = async (e) => {
-    e.preventDefault(); // Prevenir comportamiento por defecto del formulario
+    e.preventDefault();
     
     setLoading(true);
     setError('');
 
     try {
-      console.log('Enviando datos:', formData); // Debug log
-      
       const response = await fetch(`${API_BASE_URL}/work-schedule`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -64,10 +62,7 @@ const WorkReportPage = () => {
         })
       });
 
-      console.log('Response status:', response.status); // Debug log
-      
       const data = await response.json();
-      console.log('Response data:', data); // Debug log
 
       if (data.success) {
         setReports(data.reports);
@@ -75,7 +70,6 @@ const WorkReportPage = () => {
         setError(data.message || 'Error al generar reporte');
       }
     } catch (err) {
-      console.error('Error en la solicitud:', err); // Debug log
       setError('Error de conexión con el servidor');
     } finally {
       setLoading(false);
@@ -154,6 +148,7 @@ const WorkReportPage = () => {
                   <th>Empleado</th>
                   <th>Grupo</th>
                   <th>Fecha</th>
+                  <th>Tarea/Actividad</th>
                   <th>Horas Trabajadas</th>
                   <th>Producción Esperada</th>
                   <th>Producción Real</th>
@@ -162,14 +157,19 @@ const WorkReportPage = () => {
               </thead>
               <tbody>
                 {reports.map((report, index) => (
-                  <tr key={`report-${index}-${report.employee_name}-${report.date}-${report.shift_name}`}>
+                  <tr key={`report-${index}-${report.employee_name}-${report.date}`}>
                     <td>{report.employee_name}</td>
-                    <td>{report.group_name}</td>
+                    <td>{report.group_name || '-'}</td>
                     <td>{new Date(report.date).toLocaleDateString()}</td>
-                    <td>{report.hours_worked || '-'}</td>
-                    <td>{report.expected_production || '-'}</td>
-                    <td>{report.actual_production || '-'}</td>
-                    <td>{report.efficiency ? `${report.efficiency}%` : '-'}</td>
+                    <td>{report.task_description || report.shift_name || '-'}</td>
+                    <td>{report.hours_worked !== undefined && report.hours_worked !== null ? report.hours_worked : '-'}</td>
+                    <td>{report.expected_production !== undefined && report.expected_production !== null ? report.expected_production : '-'}</td>
+                    <td>{report.actual_production !== undefined && report.actual_production !== null ? report.actual_production : '-'}</td>
+                    <td>
+                      {report.efficiency_percentage !== undefined && report.efficiency_percentage !== null 
+                        ? `${parseFloat(report.efficiency_percentage).toFixed(2)}%` 
+                        : '-'}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -180,16 +180,12 @@ const WorkReportPage = () => {
             <h4>Resumen</h4>
             <div className={styles.summaryStats}>
               <div className={styles.stat}>
-                <span className={styles.label}>Total Días Trabajados:</span>
-                <span className={styles.value}>{reports.filter(r => !r.is_exception).length}</span>
-              </div>
-              <div className={styles.stat}>
-                <span className={styles.label}>Total Excepciones:</span>
-                <span className={styles.value}>{reports.filter(r => r.is_exception).length}</span>
-              </div>
-              <div className={styles.stat}>
                 <span className={styles.label}>Total Registros:</span>
                 <span className={styles.value}>{reports.length}</span>
+              </div>
+              <div className={styles.stat}>
+                <span className={styles.label}>Registros con Eficiencia:</span>
+                <span className={styles.value}>{reports.filter(r => r.is_efficiency).length}</span>
               </div>
             </div>
           </div>
