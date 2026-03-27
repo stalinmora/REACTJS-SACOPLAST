@@ -4,7 +4,7 @@ import Button from '../../components/common/Button/Button';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './CreateRolePage.module.css';
 
-const API_BASE_URL = 'http://localhost:5000/api/users'; // Asegúrate que sea correcto
+const API_BASE_URL = `${API_HOST}/api/users`; // Asegúrate que sea correcto
 
 const CreateRolePage = () => {
   const [name, setName] = useState('');

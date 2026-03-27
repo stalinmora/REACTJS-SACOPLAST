@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
+import { API_HOST } from '../../config/apiConfig';
 import Input from '../../components/common/Input/Input';
 import Select from '../../components/common/Select/Select';
 import Button from '../../components/common/Button/Button';
 import styles from './AddMachinePage.module.css';
 
-const API_BASE_URL = 'http://localhost:5000/api/machines';
+const API_BASE_URL = `${API_HOST}/api/machines`;
 
 const AddMachinePage = () => {
   const [machines, setMachines] = useState([]);
@@ -22,7 +23,7 @@ const AddMachinePage = () => {
     try {
       const [machinesRes, typesRes] = await Promise.all([
         fetch(API_BASE_URL),
-        fetch('http://localhost:5000/api/machines/types')
+        fetch(`${API_HOST}/api/machines/types`)
       ]);
 
       const machinesData = await machinesRes.json();

@@ -3,9 +3,10 @@ import Input from '../../../common/Input/Input';
 import Button from '../../../common/Button/Button';
 import { useAuth } from '../../../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { API_HOST } from '../../../../config/apiConfig';
 import styles from './LoginForm.module.css';
 
-const API_BASE_URL = 'http://localhost:5000/api/auth';
+const API_BASE_URL = `${API_HOST}/api/auth`;
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');

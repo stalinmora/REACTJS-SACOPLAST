@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
+import { API_HOST } from '../../config/apiConfig';
 import ChangePasswordModal from '../../components/features/auth/ChangePasswordModal/ChangePasswordModal';
 import styles from './ManageUsersPage.module.css';
 
-const API_BASE_URL = 'http://localhost:5000/api/users';
+const API_BASE_URL = `${API_HOST}/api/users`;
 
 const ManageUsersPage = () => {
   const [users, setUsers] = useState([]);

@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
+import { API_HOST } from '../../config/apiConfig';
 import Input from '../../components/common/Input/Input';
 import Button from '../../components/common/Button/Button';
 import styles from './MachineTypesPage.module.css';
 
-const API_BASE_URL = 'http://localhost:5000/api/machines/types';
+const API_BASE_URL = `${API_HOST}/api/machines/types`;
 
 const MachineTypesPage = () => {
   const [machineTypes, setMachineTypes] = useState([]);

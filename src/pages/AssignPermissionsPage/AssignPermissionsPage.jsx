@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
+import { API_HOST } from '../../config/apiConfig';
 import styles from './AssignPermissionsPage.module.css';
 
-const API_BASE_URL = 'http://localhost:5000/api/users'; // ✅ Cambiado de roles a users
+const API_BASE_URL = `${API_HOST}/api/users`; // ✅ Cambiado de roles a users
 
 const AssignPermissionsPage = () => {
   const [roles, setRoles] = useState([]);

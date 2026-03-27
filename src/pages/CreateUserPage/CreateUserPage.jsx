@@ -3,7 +3,7 @@ import Input from '../../components/common/Input/Input';
 import Button from '../../components/common/Button/Button';
 import styles from './CreateUserPage.module.css';
 
-const API_BASE_URL = 'http://localhost:5000/api/users';
+const API_BASE_URL = `${API_HOST}/api/users`;
 
 const CreateUserPage = () => {
   const [name, setName] = useState('');
