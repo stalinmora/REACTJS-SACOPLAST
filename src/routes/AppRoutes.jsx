@@ -22,6 +22,7 @@ import EmployeeGroupAssignmentPage from '../pages/EmployeeGroupAssignmentPage/Em
 import EfficiencyPage from '../pages/EfficiencyPage/EfficiencyPage';
 import WorkReportPage from '../pages/WorkReportPage/WorkReportPage';
 import ScheduleExceptionPage from '../pages/ScheduleExceptionPage/ScheduleExceptionPage';
+import GlobalWorkReportPage from '../pages/GlobalWorkReportPage/GlobalWorkReportPage';
 
 
 
@@ -59,6 +60,14 @@ const AppRoutes = () => {
   <ProtectedRoute>
     <PermissionRoute permission="can_manage_schedule">
       <MainLayout><ScheduleCalendarPage /></MainLayout>
+    </PermissionRoute>
+  </ProtectedRoute>
+} />
+
+<Route path="/reportes/global-horas-eficiencia" element={
+  <ProtectedRoute>
+    <PermissionRoute permission="can_view_global_reports">
+      <MainLayout><GlobalWorkReportPage /></MainLayout>
     </PermissionRoute>
   </ProtectedRoute>
 } />

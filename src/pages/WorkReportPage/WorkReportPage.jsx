@@ -77,7 +77,6 @@ const WorkReportPage = () => {
   };
 
   const exportToExcel = () => {
-    // Lógica para exportar a Excel
     alert('Funcionalidad de exportación a Excel pendiente de implementar');
   };
 

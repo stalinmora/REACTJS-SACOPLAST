@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import Input from '../../components/common/Input/Input';
-import Select from '../../components/common/Select/Select';
 import Button from '../../components/common/Button/Button';
 import styles from './EfficiencyPage.module.css';
 
@@ -14,10 +13,10 @@ const EfficiencyPage = () => {
   const [records, setRecords] = useState([]);
   const [filteredRecords, setFilteredRecords] = useState([]);
   const [totalHours, setTotalHours] = useState(0);
+  const [availableHours, setAvailableHours] = useState(12);
   const [formData, setFormData] = useState({
     employee_id: '',
     record_date: new Date().toISOString().split('T')[0],
-    area_id: '',
     task_id: '',
     hours_worked: '',
     expected_production: '',
@@ -49,23 +48,17 @@ const EfficiencyPage = () => {
       const tasksData = await tasksRes.json();
       const recordsData = await recordsRes.json();
 
-      console.log('Datos recibidos:', { // Debug log
-        employees: employeesData,
-        records: recordsData
-      });
-
       if (employeesData.success && areasData.success && tasksData.success && recordsData.success) {
         setEmployees(employeesData.employees);
-        setAllEmployees(employeesData.employees); // Para búsqueda
+        setAllEmployees(employeesData.employees);
         setAreas(areasData.areas);
         setTasks(tasksData.tasks);
-        setAllTasks(tasksData.tasks); // Para búsqueda
+        setAllTasks(tasksData.tasks);
         setRecords(recordsData.records);
       } else {
         setError(employeesData.message || areasData.message || tasksData.message || recordsData.message || 'Error al cargar datos');
       }
     } catch (err) {
-      console.error('Error en fetchData:', err); // Debug log
       setError('Error de conexión con el servidor');
     } finally {
       setLoading(false);
@@ -73,8 +66,8 @@ const EfficiencyPage = () => {
   };
 
   // Variables para búsqueda
-  const [allEmployees, setAllEmployees] = useState([]); // Para búsqueda
-  const [allTasks, setAllTasks] = useState([]); // Para búsqueda
+  const [allEmployees, setAllEmployees] = useState([]);
+  const [allTasks, setAllTasks] = useState([]);
 
   // Filtrar empleados por nombre o apellido
   useEffect(() => {
@@ -89,13 +82,9 @@ const EfficiencyPage = () => {
     }
   }, [searchTerm, allEmployees]);
 
-  // Filtrar tareas por área y descripción
+  // Filtrar tareas por descripción
   useEffect(() => {
     let filtered = allTasks;
-
-    if (formData.area_id) {
-      filtered = filtered.filter(task => task.area_id == formData.area_id);
-    }
 
     if (taskSearchTerm) {
       filtered = filtered.filter(task =>
@@ -105,10 +94,32 @@ const EfficiencyPage = () => {
     }
 
     setFilteredTasks(filtered);
-  }, [formData.area_id, taskSearchTerm, allTasks]);
+  }, [taskSearchTerm, allTasks]);
 
+  // Calcular horas totales y disponibles para el empleado seleccionado
   useEffect(() => {
-    // Calcular producción esperada cuando cambia tarea o horas
+    if (formData.employee_id) {
+      const filtered = records.filter(record => {
+        const recordDate = new Date(record.record_date).toISOString().split('T')[0];
+        const selectedDate = formData.record_date;
+        return recordDate === selectedDate && record.employee_id == formData.employee_id;
+      });
+      
+      setFilteredRecords(filtered);
+      
+      const total = filtered.reduce((sum, record) => sum + record.hours_worked, 0);
+      setTotalHours(total);
+      setAvailableHours(12 - total);
+    } else {
+      // Si no hay empleado seleccionado, no mostrar registros ni calcular horas
+      setFilteredRecords([]);
+      setTotalHours(0);
+      setAvailableHours(12);
+    }
+  }, [records, formData.record_date, formData.employee_id]);
+
+  // Calcular producción esperada
+  useEffect(() => {
     if (formData.task_id && formData.hours_worked) {
       const selectedTask = tasks.find(t => t.id === parseInt(formData.task_id));
       if (selectedTask) {
@@ -118,8 +129,7 @@ const EfficiencyPage = () => {
         if (selectedTask.target_per_hour) {
           expected = selectedTask.target_per_hour * hours;
         } else if (selectedTask.target_per_shift) {
-          // Si es por turno, calcular proporcionalmente
-          expected = (selectedTask.target_per_shift / 8) * hours; // Asumiendo turno de 8 horas
+          expected = (selectedTask.target_per_shift / 8) * hours;
         }
 
         setFormData(prev => ({
@@ -129,21 +139,6 @@ const EfficiencyPage = () => {
       }
     }
   }, [formData.task_id, formData.hours_worked, tasks]);
-
-  useEffect(() => {
-    // Filtrar registros por la fecha y empleado seleccionados
-    const filtered = records.filter(record => {
-      const recordDate = new Date(record.record_date).toISOString().split('T')[0];
-      const selectedDate = formData.record_date;
-      return recordDate === selectedDate && record.employee_id == formData.employee_id;
-    });
-    
-    setFilteredRecords(filtered);
-    
-    // Calcular horas totales trabajadas para el empleado en esa fecha
-    const total = filtered.reduce((sum, record) => sum + record.hours_worked, 0);
-    setTotalHours(total);
-  }, [records, formData.record_date, formData.employee_id]);
 
   const calculateEfficiency = (expected, actual) => {
     if (!expected || !actual) return 0;
@@ -163,7 +158,7 @@ const EfficiencyPage = () => {
       return;
     }
 
-    // Verificar que las horas totales no excedan 12
+    // Verificar que no exceda las horas disponibles
     const newTotalHours = totalHours + parseFloat(formData.hours_worked);
     if (newTotalHours > 12) {
       setError(`El empleado ya tiene ${totalHours} horas registradas. Al sumar ${formData.hours_worked} horas más, excedería el límite de 12 horas por día.`);
@@ -192,11 +187,10 @@ const EfficiencyPage = () => {
       const data = await response.json();
 
       if (data.success) {
-        fetchData(); // Refrescar todos los datos
+        fetchData(); // Recargar todos los registros
         setFormData({
-          employee_id: formData.employee_id, // Mantener el mismo empleado
-          record_date: formData.record_date, // Mantener la misma fecha
-          area_id: '',
+          employee_id: formData.employee_id,
+          record_date: formData.record_date,
           task_id: '',
           hours_worked: '',
           expected_production: '',
@@ -210,10 +204,6 @@ const EfficiencyPage = () => {
     } catch (err) {
       setError('Error de conexión con el servidor');
     }
-  };
-
-  const handleAreaChange = (areaId) => {
-    setFormData(prev => ({ ...prev, area_id: areaId, task_id: '' }));
   };
 
   const handleTaskChange = (taskId) => {
@@ -242,7 +232,7 @@ const EfficiencyPage = () => {
   const closeEmployeeModal = () => {
     setShowEmployeeModal(false);
     setSearchTerm('');
-    setEmployees(allEmployees); // Restaurar todos los empleados
+    setEmployees(allEmployees);
   };
 
   const openTaskModal = () => {
@@ -287,19 +277,6 @@ const EfficiencyPage = () => {
         </div>
         
         <div className={styles.row}>
-          <Select
-            label="Área"
-            value={formData.area_id}
-            onChange={(e) => handleAreaChange(e.target.value)}
-            options={[
-              { value: '', label: 'Seleccionar área...' },
-              ...areas.map(area => ({ 
-                value: area.id, 
-                label: area.name 
-              }))
-            ]}
-            required
-          />
           <div>
             <label className={styles.label}>Tarea Asignada</label>
             <div className={styles.selectedTask}>
@@ -319,10 +296,10 @@ const EfficiencyPage = () => {
             type="number"
             step="0.01"
             min="0.01"
-            max="12"
+            max={availableHours > 0 ? availableHours : 0}
             value={formData.hours_worked}
             onChange={(e) => handleHoursChange(e.target.value)}
-            placeholder={`Máximo ${12 - totalHours} horas`}
+            placeholder={`Máximo ${availableHours > 0 ? availableHours.toFixed(2) : '0'} horas`}
             required
           />
           <Input
@@ -353,6 +330,11 @@ const EfficiencyPage = () => {
               {totalHours}h de 12h máximas
             </span>
           </h4>
+          <h4>Horas Disponibles: 
+            <span className={styles.availableHours}>
+              {availableHours > 0 ? availableHours.toFixed(2) : '0'}h
+            </span>
+          </h4>
           <h4>Porcentaje de Eficiencia: 
             <span className={styles.percentage}>
               {calculateEfficiency(formData.expected_production, formData.actual_production)}%
@@ -370,12 +352,13 @@ const EfficiencyPage = () => {
         <table className={styles.table}>
           <thead>
             <tr>
+              <th>Empleado</th>
               <th>Tarea</th>
               <th>Área</th>
-              <th>Horas</th>
-              <th>Esperada</th>
-              <th>Real</th>
-              <th>Eficiencia</th>
+              <th className={styles.narrowColumn}>Horas</th>
+              <th className={styles.narrowColumn}>Esperada</th>
+              <th className={styles.narrowColumn}>Real</th>
+              <th className={styles.narrowColumn}>Eficiencia</th>
             </tr>
           </thead>
           <tbody>
@@ -383,15 +366,17 @@ const EfficiencyPage = () => {
               filteredRecords.map(record => {
                 const task = tasks.find(t => t.id === record.task_id);
                 const area = areas.find(a => a.id === task?.area_id);
+                const employee = employees.find(e => e.id === record.employee_id);
                 
                 return (
                   <tr key={record.id}>
-                    <td>{task?.description || '-'}</td>
-                    <td>{area?.name || '-'}</td>
-                    <td>{record.hours_worked}h</td>
-                    <td>{record.expected_production || '-'}</td>
-                    <td>{record.actual_production || '-'}</td>
-                    <td>
+                    <td style={{ fontSize: '0.85rem' }}>{employee?.nombre_operador || '-'}</td>
+                    <td style={{ fontSize: '0.85rem' }}>{task?.description || '-'}</td>
+                    <td style={{ fontSize: '0.85rem' }}>{area?.name || '-'}</td>
+                    <td className={styles.narrowColumn} style={{ fontSize: '0.85rem' }}>{record.hours_worked}h</td>
+                    <td className={styles.narrowColumn} style={{ fontSize: '0.85rem' }}>{record.expected_production || '-'}</td>
+                    <td className={styles.narrowColumn} style={{ fontSize: '0.85rem' }}>{record.actual_production || '-'}</td>
+                    <td className={styles.narrowColumn} style={{ fontSize: '0.85rem' }}>
                       <span className={`${styles.percentage} ${record.efficiency_percentage >= 100 ? styles.high : record.efficiency_percentage >= 80 ? styles.medium : styles.low}`}>
                         {record.efficiency_percentage}%
                       </span>
@@ -401,7 +386,7 @@ const EfficiencyPage = () => {
               })
             ) : (
               <tr>
-                <td colSpan="6" className={styles.noData}>No hay registros para este empleado en esta fecha</td>
+                <td colSpan="7" className={styles.noData}>No hay registros para este empleado en esta fecha</td>
               </tr>
             )}
           </tbody>
@@ -451,18 +436,6 @@ const EfficiencyPage = () => {
               <button onClick={closeTaskModal} className={styles.closeButton}>×</button>
             </div>
             <div className={styles.modalBody}>
-              <Select
-                label="Filtrar por Área"
-                value={formData.area_id}
-                onChange={(e) => setFormData(prev => ({ ...prev, area_id: e.target.value }))}
-                options={[
-                  { value: '', label: 'Todas las áreas...' },
-                  ...areas.map(area => ({ 
-                    value: area.id, 
-                    label: area.name 
-                  }))
-                ]}
-              />
               <Input
                 label="Buscar por descripción o especificación"
                 type="text"

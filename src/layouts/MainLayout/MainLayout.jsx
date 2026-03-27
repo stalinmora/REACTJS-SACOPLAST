@@ -97,6 +97,9 @@ const MainLayout = ({ children }) => {
                 {hasPermission('can_view_work_reports') && (
                   <li><button onClick={() => { goTo('/reportes/dias-trabajados'); closeAllMenus(); }} className={styles.dropdownItem}>Días y Horarios Trabajados</button></li>
                 )}
+                {hasPermission('can_view_global_reports') && (
+                  <li><button onClick={() => { goTo('/reportes/global-horas-eficiencia'); closeAllMenus(); }} className={styles.dropdownItem}>Horas y Eficiencia Global</button></li>
+                )}
               </ul>
             )}
           </li>
