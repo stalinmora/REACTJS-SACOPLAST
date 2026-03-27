@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
+import { API_HOST } from '../../config/apiConfig';
 import Button from '../../components/common/Button/Button';
 import styles from './EmployeeSyncPage.module.css';
 
-const API_BASE_URL = 'http://localhost:5000/api/employees';
+const API_BASE_URL = `${API_HOST}/api/employees`;
 
 const EmployeeSyncPage = () => {
   const [loading, setLoading] = useState(false);

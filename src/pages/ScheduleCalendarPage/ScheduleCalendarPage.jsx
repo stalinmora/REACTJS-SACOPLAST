@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
+import { API_HOST } from '../../config/apiConfig';
 import Select from '../../components/common/Select/Select';
 import Button from '../../components/common/Button/Button';
 import styles from './ScheduleCalendarPage.module.css';
 
-const API_BASE_URL = 'http://localhost:5000/api/schedule';
+const API_BASE_URL = `${API_HOST}/api/schedule`;
 
 const ScheduleCalendarPage = () => {
   const [currentDate, setCurrentDate] = useState(new Date());

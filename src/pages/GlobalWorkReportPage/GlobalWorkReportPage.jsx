@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
+import { API_HOST } from '../../config/apiConfig';
 import Input from '../../components/common/Input/Input';
 import Button from '../../components/common/Button/Button';
 import styles from './GlobalWorkReportPage.module.css';
 
-const API_BASE_URL = 'http://localhost:5000/api/reports';
+const API_BASE_URL = `${API_HOST}/api/reports`;
 
 const GlobalWorkReportPage = () => {
   const [reportData, setReportData] = useState([]);

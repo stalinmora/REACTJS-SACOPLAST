@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
+import { API_HOST } from '../../config/apiConfig';
 import Input from '../../components/common/Input/Input';
 import Button from '../../components/common/Button/Button';
 import styles from './EfficiencyPage.module.css';
 
-const API_BASE_URL = 'http://localhost:5000/api/efficiency';
+const API_BASE_URL = `${API_HOST}/api/efficiency`;
 
 const EfficiencyPage = () => {
   const [employees, setEmployees] = useState([]);

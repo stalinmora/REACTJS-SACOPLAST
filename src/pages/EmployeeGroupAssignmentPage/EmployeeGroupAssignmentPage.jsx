@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import Select from '../../components/common/Select/Select';
 import Button from '../../components/common/Button/Button';
+import { API_HOST } from '../../config/apiConfig';
 import styles from './EmployeeGroupAssignmentPage.module.css';
 
-const API_BASE_URL = 'http://localhost:5000/api/employee-groups';
+const API_BASE_URL = `${API_HOST}/api/employee-groups`;
 
 const EmployeeGroupAssignmentPage = () => {
   const [availableEmployees, setAvailableEmployees] = useState([]);

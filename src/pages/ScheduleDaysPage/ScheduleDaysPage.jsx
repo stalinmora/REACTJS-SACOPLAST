@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
+import { API_HOST } from '../../config/apiConfig';
 import Input from '../../components/common/Input/Input';
 import Select from '../../components/common/Select/Select';
 import Button from '../../components/common/Button/Button';
 import styles from './ScheduleDaysPage.module.css';
 
-const API_BASE_URL = 'http://localhost:5000/api/schedule';
+const API_BASE_URL = `${API_HOST}/api/schedule`;
 
 const ScheduleDaysPage = () => {
   const [scheduleDays, setScheduleDays] = useState([]);
@@ -29,8 +30,8 @@ const ScheduleDaysPage = () => {
     try {
       const [daysRes, shiftsRes, usersRes] = await Promise.all([
         fetch(API_BASE_URL),
-        fetch('http://localhost:5000/api/schedule/shifts'),
-        fetch('http://localhost:5000/api/schedule/users')
+        fetch(`${API_HOST}/api/schedule/shifts`),
+        fetch(`${API_HOST}/api/schedule/users`)
       ]);
 
       const daysData = await daysRes.json();

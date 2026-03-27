@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import Input from '../../components/common/Input/Input';
 import Button from '../../components/common/Button/Button';
+import { API_HOST } from '../../config/apiConfig';
 import styles from './AreasPage.module.css';
 
-const API_BASE_URL = 'http://localhost:5000/api/tasks/areas';
+const API_BASE_URL = `${API_HOST}/api/tasks/areas`;
 
 const AreasPage = () => {
   const [areas, setAreas] = useState([]);

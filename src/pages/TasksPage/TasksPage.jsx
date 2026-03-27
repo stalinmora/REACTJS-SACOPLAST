@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
+import { API_HOST } from '../../config/apiConfig';
 import Input from '../../components/common/Input/Input';
 import Select from '../../components/common/Select/Select';
 import Button from '../../components/common/Button/Button';
 import styles from './TasksPage.module.css';
 
-const API_BASE_URL = 'http://localhost:5000/api/tasks';
+const API_BASE_URL = `${API_HOST}/api/tasks`;
 
 const TasksPage = () => {
   const [tasks, setTasks] = useState([]);
@@ -31,7 +32,7 @@ const TasksPage = () => {
     try {
       const [tasksRes, areasRes] = await Promise.all([
         fetch(API_BASE_URL),
-        fetch('http://localhost:5000/api/tasks/areas')
+        fetch(`${API_HOST}/api/tasks/areas`)
       ]);
 
       const tasksData = await tasksRes.json();

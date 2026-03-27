@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
+import { API_HOST } from '../../config/apiConfig';
 import Input from '../../components/common/Input/Input';
 import Select from '../../components/common/Select/Select';
 import Button from '../../components/common/Button/Button';
 import styles from './WorkReportPage.module.css';
 
-const API_BASE_URL = 'http://localhost:5000/api/reports';
+const API_BASE_URL = `${API_HOST}/api/reports`;
 
 const WorkReportPage = () => {
   const [employees, setEmployees] = useState([]);
