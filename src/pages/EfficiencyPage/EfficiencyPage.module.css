@@ -7,16 +7,6 @@
   max-width: 1200px;
 }
 
-/* ... (todo el CSS anterior permanece igual) ... */
-
-.narrowColumn {
-  width: 8% !important; /* Reducido en ~20% para que se muestren mejor */
-  max-width: 80px; /* Ancho máximo para mantener proporciones */
-  min-width: 60px; /* Ancho mínimo para legibilidad */
-}
-
-/* ... (todo el CSS posterior permanece igual) ... */
-
 .form {
   margin-bottom: 24px;
   padding: 20px;
@@ -135,6 +125,12 @@
   background-color: #f8f9fa;
 }
 
+.narrowColumn {
+  width: 8% !important; /* Reducido en ~20% para que se muestren mejor */
+  max-width: 80px; /* Ancho máximo para mantener proporciones */
+  min-width: 60px; /* Ancho mínimo para legibilidad */
+}
+
 .noData {
   text-align: center;
   padding: 20px;
@@ -201,6 +197,22 @@
 
 .modalBody {
   padding: 20px;
+}
+
+.select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  margin-bottom: 12px;
+  background-color: white;
+}
+
+.select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
 .employeeList,

@@ -5,14 +5,12 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   width: 100%;
   max-width: 1200px;
+  margin: 0 auto;
 }
 
 .filters {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
   margin-bottom: 24px;
-  padding: 20px;
+  padding: 16px;
   background-color: #f8f9fa;
   border-radius: 8px;
 }
@@ -20,6 +18,7 @@
 .row {
   display: flex;
   gap: 16px;
+  margin-bottom: 16px;
 }
 
 .row > div {
@@ -28,7 +27,7 @@
 
 .buttonGroup {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   justify-content: flex-start;
 }
 
@@ -44,14 +43,14 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 16px;
+  font-size: 0.85rem;
 }
 
 .table th,
 .table td {
-  padding: 12px;
+  padding: 8px 12px;
   border: 1px solid #ddd;
-  text-align: center;
+  text-align: left;
   vertical-align: middle;
 }
 
@@ -63,39 +62,34 @@
   z-index: 10;
 }
 
-.table th:first-child,
-.table td:first-child {
-  position: sticky;
-  left: 0;
-  z-index: 20;
-  background-color: inherit;
-}
-
-.table tbody tr:nth-child(even) {
+.table tbody tr:hover {
   background-color: #f8f9fa;
 }
 
 .dataCell {
-  min-width: 120px;
+  text-align: center;
+  vertical-align: middle;
+  padding: 8px;
+  border: 1px solid #ddd;
 }
 
 .cellContent {
   display: flex;
   flex-direction: column;
-  gap: 4px;
   align-items: center;
-  justify-content: center;
+  gap: 4px;
 }
 
-.hours {
+.hours, .efficiency {
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+.freeDay {
   font-weight: bold;
-  color: #28a745;
-  font-size: 0.9rem;
-}
-
-.efficiency {
-  color: #007bff;
-  font-size: 0.8rem;
+  color: #8b4513; /* Marrón oscuro */
+  text-align: center;
+  padding: 4px;
 }
 
 .noData {
@@ -104,9 +98,19 @@
 }
 
 .error {
-  color: red;
-  margin-bottom: 16px;
-  padding: 12px;
+  color: #dc3545;
   background-color: #f8d7da;
+  padding: 12px;
   border-radius: 4px;
+  margin-bottom: 16px;
+  border: 1px solid #f5c6cb;
+}
+
+.success {
+  color: #155724;
+  background-color: #d4edda;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  border: 1px solid #c3e6cb;
 }

@@ -3,6 +3,7 @@ import Input from '../../components/common/Input/Input';
 import Button from '../../components/common/Button/Button';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './CreateRolePage.module.css';
+import { API_HOST } from '../../config/apiConfig';
 
 const API_BASE_URL = `${API_HOST}/api/users`; // Asegúrate que sea correcto
 

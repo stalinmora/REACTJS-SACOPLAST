@@ -19,45 +19,94 @@ const GlobalWorkReportPage = () => {
   const generateReport = async (e) => {
     e.preventDefault();
     
+    console.log('=== GENERANDO REPORTE ===');
+    console.log('Datos del formulario:', formData);
+    console.log('URL base:', API_BASE_URL);
+    console.log('URL completa:', `${API_BASE_URL}/global-work-schedule`);
+    
     setLoading(true);
     setError('');
 
     try {
+      // Primero, probemos si podemos acceder al endpoint
+      console.log('Intentando acceder al endpoint...');
+      
       const response = await fetch(`${API_BASE_URL}/global-work-schedule`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({
           start_date: formData.start_date,
           end_date: formData.end_date
         })
       });
 
-      const data = await response.json();
+
+
+// ✅ Ahora (correcto)
+console.log('Response status:', response.status);
+console.log('Response headers:', response.headers);
+      
+      // Intentar leer el cuerpo de la respuesta como texto primero para ver si hay errores
+      const responseText = await response.text();
+      console.log('Response text (raw):', responseText);
+
+      // Intentar parsear como JSON
+      let data;
+      try {
+        data = JSON.parse(responseText);
+        console.log('Response data (parsed):', data);
+      } catch (parseError) {
+        console.error('Error parsing JSON response:', parseError);
+        console.error('Raw response:', responseText);
+        throw new Error('La respuesta del servidor no es un JSON válido');
+      }
 
       if (data.success) {
+        console.log('Procesando datos recibidos...');
         processData(data.reports);
+        console.log('Datos procesados exitosamente');
       } else {
+        console.error('Respuesta con error:', data.message);
         setError(data.message || 'Error al generar reporte');
       }
     } catch (err) {
-      setError('Error de conexión con el servidor');
+      console.error('Error completo en la solicitud:', err);
+      console.error('Tipo de error:', typeof err);
+      console.error('Mensaje de error:', err.message);
+      console.error('Stack de error:', err.stack);
+      
+      if (err.message.includes('fetch')) {
+        setError('No se puede conectar con el servidor. Verifica que el servidor esté corriendo.');
+      } else if (err.message.includes('404')) {
+        setError('Endpoint no encontrado. Verifica que el endpoint esté correctamente registrado en el servidor.');
+      } else if (err.message.includes('JSON')) {
+        setError('La respuesta del servidor no es válida. Verifica el formato de la respuesta.');
+      } else {
+        setError('Error de conexión con el servidor: ' + err.message);
+      }
     } finally {
+      console.log('Finalizando solicitud');
       setLoading(false);
     }
   };
 
   const processData = (rawData) => {
-    console.log('Datos crudos recibidos:', rawData); // Debug log
+    console.log('Procesando datos:', rawData);
     
     if (!rawData || !Array.isArray(rawData)) {
-      console.error('Datos inválidos:', rawData); // Debug log
+      console.error('Datos inválidos para procesar:', rawData);
       return;
     }
 
-    // Agrupar datos por empleado y fecha
+    // Obtener fechas únicas
+    const uniqueDates = [...new Set(rawData.map(item => item.date))].sort();
+    console.log('Fechas encontradas:', uniqueDates);
+    
+    // Agrupar datos por empleado
     const groupedByEmployee = rawData.reduce((acc, item) => {
-      console.log('Procesando item:', item); // Debug log
-      
       const employeeId = item.employee_id;
       if (!acc[employeeId]) {
         acc[employeeId] = {
@@ -76,80 +125,74 @@ const GlobalWorkReportPage = () => {
       
       if (!acc[employeeId].dateData[formattedDate]) {
         acc[employeeId].dateData[formattedDate] = {
-          total_hours: 0,
-          weighted_sum: 0, // Acumulador para (eficiencia × horas)
-          individual_records: [] // Para debug
+          hours_worked: item.hours_worked || 0,
+          efficiency_percentage: item.efficiency_percentage || 0,
+          shift_info: item.shift_name || 'N/A'
         };
       }
-      
-      // Obtener valores reales
-      const hours = parseFloat(item.hours_worked) || 0;
-      const efficiency = parseFloat(item.efficiency_percentage) || 0;
-      
-      console.log('Valores - Horas:', hours, 'Eficiencia:', efficiency); // Debug log
-      
-      // Sumar horas totales
-      acc[employeeId].dateData[formattedDate].total_hours += hours;
-      
-      // Sumar para el ponderado: (eficiencia × horas)
-      const product = efficiency * hours;
-      acc[employeeId].dateData[formattedDate].weighted_sum += product;
-      
-      // Guardar registro individual para debug
-      acc[employeeId].dateData[formattedDate].individual_records.push({
-        hours: hours,
-        efficiency: efficiency,
-        product: product
-      });
       
       return acc;
     }, {});
 
-    console.log('Agrupado por empleado:', groupedByEmployee); // Debug log
+    console.log('Agrupado por empleado:', groupedByEmployee);
 
-    // Calcular promedio ponderado por fecha
-    const processedData = Object.values(groupedByEmployee).map(employee => {
-      const processedDateData = {};
-      const uniqueDates = new Set();
-      
-      Object.entries(employee.dateData).forEach(([date, data]) => {
-        uniqueDates.add(date);
-        
-        // Calcular promedio ponderado: Σ(Eficiencia × Horas) / 12
-        const weighted_average = 12 > 0 
-          ? parseFloat((data.weighted_sum / 12).toFixed(2))
-          : 0;
-        
-        processedDateData[date] = {
-          total_hours: parseFloat(data.total_hours.toFixed(2)),
-          weighted_average: weighted_average,
-          individual_records: data.individual_records
-        };
-        
-        console.log('Cálculo detallado para', date, ':'); // Debug log
-        console.log('  Suma ponderada:', data.weighted_sum); // Debug log
-        console.log('  Divisor (12 horas):', 12); // Debug log
-        console.log('  Promedio ponderado:', weighted_average); // Debug log
-        console.log('  Registros individuales:', data.individual_records); // Debug log
-      });
-      
-      return {
-        ...employee,
-        dateData: processedDateData
-      };
-    });
+    // Convertir a array para la tabla
+    const processedData = Object.values(groupedByEmployee);
 
-    // Obtener fechas únicas para el encabezado
-    const allDates = [...new Set(rawData.map(item => item.date))].sort();
-    console.log('Fechas únicas:', allDates); // Debug log
-    
-    console.log('Datos procesados finales:', processedData); // Debug log
-    setDates(allDates);
+    console.log('Datos procesados finalizados:', processedData);
+    setDates(uniqueDates);
     setReportData(processedData);
   };
 
   const exportToExcel = () => {
     alert('Funcionalidad de exportación a Excel pendiente de implementar');
+  };
+
+  // Función para determinar el tipo de turno basado en la información disponible
+  const getShiftType = (dayData) => {
+    if (!dayData) {
+      return 'LIBRE'; // No tiene registros, está libre
+    }
+    
+    const hours = dayData.hours_worked || 0;
+    const shiftName = dayData.shift_info || '';
+    
+    if (hours === 0) {
+      return 'LIBRE'; // No trabajó, está libre
+    } else if (shiftName.toLowerCase().includes('mañana') || shiftName.toLowerCase().includes('morning') || hours <= 8) {
+      return 'MAÑANA'; // Turno de mañana
+    } else if (shiftName.toLowerCase().includes('noche') || shiftName.toLowerCase().includes('night') || hours > 8) {
+      return 'NOCHE'; // Turno de noche
+    } else {
+      return 'MAÑANA'; // Por defecto, turno de mañana
+    }
+  };
+
+  // Función para obtener el estilo de celda según el turno
+  const getCellStyle = (shiftType) => {
+    switch (shiftType) {
+      case 'MAÑANA':
+        return {
+          backgroundColor: '#add8e6', // Celeste claro
+          color: '#000080' // Azul oscuro para el texto
+        };
+      case 'NOCHE':
+        return {
+          backgroundColor: '#d3d3d3', // Gris claro
+          color: '#2f4f4f' // Gris oscuro para el texto
+        };
+      case 'LIBRE':
+        return {
+          backgroundColor: '#ffffcc', // Amarillo claro
+          color: '#8b4513', // Marrón oscuro para el texto
+          fontWeight: 'bold'
+        };
+      default:
+        return {
+          backgroundColor: '#ffffff', // Blanco por defecto
+          color: '#000000'
+        };
+    }
   };
 
   return (
@@ -216,15 +259,23 @@ const GlobalWorkReportPage = () => {
                       });
                       
                       const dayData = employee.dateData[formattedDate];
-                      
-                      console.log('Mostrando datos para:', formattedDate, dayData); // Debug log
+                      const shiftType = getShiftType(dayData);
+                      const cellStyle = getCellStyle(shiftType);
                       
                       return (
-                        <td key={date} className={styles.dataCell}>
-                          {dayData ? (
+                        <td 
+                          key={date} 
+                          className={styles.dataCell}
+                          style={cellStyle}
+                        >
+                          {shiftType === 'LIBRE' ? (
                             <div className={styles.cellContent}>
-                              <div className={styles.hours}>Horas: {dayData.total_hours}</div>
-                              <div className={styles.efficiency}>Eficiencia: {dayData.weighted_average}%</div>
+                              <div className={styles.freeDay}>LIBRE</div>
+                            </div>
+                          ) : dayData ? (
+                            <div className={styles.cellContent}>
+                              <div className={styles.hours}>Horas: {dayData.hours_worked}</div>
+                              <div className={styles.efficiency}>Eficiencia: {dayData.efficiency_percentage}%</div>
                             </div>
                           ) : (
                             <div className={styles.noData}>-</div>

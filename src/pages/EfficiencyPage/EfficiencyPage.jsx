@@ -18,6 +18,7 @@ const EfficiencyPage = () => {
   const [formData, setFormData] = useState({
     employee_id: '',
     record_date: new Date().toISOString().split('T')[0],
+    area_id: '', // Añadido para el filtro de tareas
     task_id: '',
     hours_worked: '',
     expected_production: '',
@@ -83,9 +84,13 @@ const EfficiencyPage = () => {
     }
   }, [searchTerm, allEmployees]);
 
-  // Filtrar tareas por descripción
+  // Filtrar tareas por área y descripción
   useEffect(() => {
     let filtered = allTasks;
+
+    if (formData.area_id) {
+      filtered = filtered.filter(task => task.area_id == formData.area_id);
+    }
 
     if (taskSearchTerm) {
       filtered = filtered.filter(task =>
@@ -95,7 +100,7 @@ const EfficiencyPage = () => {
     }
 
     setFilteredTasks(filtered);
-  }, [taskSearchTerm, allTasks]);
+  }, [formData.area_id, taskSearchTerm, allTasks]);
 
   // Calcular horas totales y disponibles para el empleado seleccionado
   useEffect(() => {
@@ -192,6 +197,7 @@ const EfficiencyPage = () => {
         setFormData({
           employee_id: formData.employee_id,
           record_date: formData.record_date,
+          area_id: '',
           task_id: '',
           hours_worked: '',
           expected_production: '',
@@ -244,6 +250,7 @@ const EfficiencyPage = () => {
   const closeTaskModal = () => {
     setShowTaskModal(false);
     setTaskSearchTerm('');
+    setFormData(prev => ({ ...prev, area_id: '' })); // Limpiar filtro de área al cerrar
   };
 
   if (loading) return <div>Cargando...</div>;
@@ -437,6 +444,16 @@ const EfficiencyPage = () => {
               <button onClick={closeTaskModal} className={styles.closeButton}>×</button>
             </div>
             <div className={styles.modalBody}>
+              <select
+                value={formData.area_id || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, area_id: e.target.value }))}
+                className={styles.select}
+              >
+                <option value="">Todas las áreas...</option>
+                {areas.map(area => (
+                  <option key={area.id} value={area.id}>{area.name}</option>
+                ))}
+              </select>
               <Input
                 label="Buscar por descripción o especificación"
                 type="text"

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Input from '../../components/common/Input/Input';
 import Button from '../../components/common/Button/Button';
 import styles from './CreateUserPage.module.css';
+import { API_HOST } from '../../config/apiConfig';
 
 const API_BASE_URL = `${API_HOST}/api/users`;
 

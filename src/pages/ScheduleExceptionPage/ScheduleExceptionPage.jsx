@@ -22,6 +22,9 @@ const ScheduleExceptionPage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [editingId, setEditingId] = useState(null);
+  const [showEmployeeModal, setShowEmployeeModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [cargoFilter, setCargoFilter] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -41,6 +44,7 @@ const ScheduleExceptionPage = () => {
 
       if (employeesData.success && shiftsData.success && exceptionsData.success) {
         setEmployees(employeesData.employees);
+        setAllEmployees(employeesData.employees);
         setShifts(shiftsData.shifts);
         setExceptions(exceptionsData.exceptions);
         setFilteredExceptions(exceptionsData.exceptions);
@@ -53,6 +57,29 @@ const ScheduleExceptionPage = () => {
       setLoading(false);
     }
   };
+
+  // Variables para búsqueda
+  const [allEmployees, setAllEmployees] = useState([]);
+
+  // Filtrar empleados por nombre y cargo
+  useEffect(() => {
+    let filtered = allEmployees;
+
+    if (searchTerm) {
+      filtered = filtered.filter(emp =>
+        emp.nombre_operador.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        emp.empleado_identificacion.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (cargoFilter) {
+      filtered = filtered.filter(emp =>
+        emp.cargo && emp.cargo.toLowerCase().includes(cargoFilter.toLowerCase())
+      );
+    }
+
+    setEmployees(filtered);
+  }, [searchTerm, cargoFilter, allEmployees]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -105,6 +132,11 @@ const ScheduleExceptionPage = () => {
     }
   };
 
+  const handleEmployeeChange = (employeeId) => {
+    setFormData(prev => ({ ...prev, employee_id: employeeId }));
+    setShowEmployeeModal(false);
+  };
+
   const handleEdit = (exception) => {
     setFormData({
       employee_id: exception.original_employee_id.toString(),
@@ -151,6 +183,19 @@ const ScheduleExceptionPage = () => {
     resetForm();
   };
 
+  const openEmployeeModal = () => {
+    setShowEmployeeModal(true);
+    setSearchTerm('');
+    setCargoFilter('');
+  };
+
+  const closeEmployeeModal = () => {
+    setShowEmployeeModal(false);
+    setSearchTerm('');
+    setCargoFilter('');
+    setEmployees(allEmployees);
+  };
+
   if (loading) return <div>Cargando...</div>;
 
   return (
@@ -165,16 +210,17 @@ const ScheduleExceptionPage = () => {
       
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.row}>
-          <Select
-            label="Empleado"
-            value={formData.employee_id}
-            onChange={(e) => setFormData({...formData, employee_id: e.target.value})}
-            options={[
-              { value: '', label: 'Seleccionar empleado...' },
-              ...employees.map(emp => ({ value: emp.id.toString(), label: `${emp.nombre_operador} (${emp.empleado_identificacion})` }))
-            ]}
-            required
-          />
+          <div>
+            <label className={styles.label}>Empleado</label>
+            <div className={styles.selectedEmployee}>
+              {allEmployees.find(emp => emp.id == formData.employee_id) 
+                ? `${allEmployees.find(emp => emp.id == formData.employee_id).nombre_operador} (${allEmployees.find(emp => emp.id == formData.employee_id).empleado_identificacion}) - ${allEmployees.find(emp => emp.id == formData.employee_id).cargo || 'Sin cargo'}`
+                : 'Seleccionar empleado...'}
+              <Button variant="secondary" type="button" onClick={openEmployeeModal}>
+                Buscar
+              </Button>
+            </div>
+          </div>
           <Input
             label="Fecha de Excepción"
             type="date"
@@ -235,7 +281,7 @@ const ScheduleExceptionPage = () => {
             {filteredExceptions.length > 0 ? (
               filteredExceptions.map(exception => (
                 <tr key={exception.id}>
-                  <td>{employees.find(e => e.id === exception.original_employee_id)?.nombre_operador || 'N/A'}</td>
+                  <td>{allEmployees.find(e => e.id === exception.original_employee_id)?.nombre_operador || 'N/A'}</td>
                   <td>{new Date(exception.exception_date).toLocaleDateString()}</td>
                   <td>{shifts.find(s => s.id === exception.shift_id)?.name || 'N/A'}</td>
                   <td>{exception.reason || '-'}</td>
@@ -257,6 +303,47 @@ const ScheduleExceptionPage = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Modal para buscar empleado */}
+      {showEmployeeModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <div className={styles.modalHeader}>
+              <h3>Buscar Empleado</h3>
+              <button onClick={closeEmployeeModal} className={styles.closeButton}>×</button>
+            </div>
+            <div className={styles.modalBody}>
+              <Input
+                label="Buscar por nombre o identificación"
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Escribe nombre o identificación..."
+              />
+              <Input
+                label="Filtrar por cargo"
+                type="text"
+                value={cargoFilter}
+                onChange={(e) => setCargoFilter(e.target.value)}
+                placeholder="Escribe cargo..."
+              />
+              <div className={styles.employeeList}>
+                {employees.map(employee => (
+                  <div 
+                    key={employee.id} 
+                    className={styles.employeeItem}
+                    onClick={() => handleEmployeeChange(employee.id.toString())}
+                  >
+                    <div className={styles.employeeName}>{employee.nombre_operador}</div>
+                    <div className={styles.employeeId}>{employee.empleado_identificacion}</div>
+                    <div className={styles.employeeCargo}>{employee.cargo || 'Sin cargo'}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
